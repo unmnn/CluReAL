@@ -7,12 +7,12 @@
 <!-- badges: end -->
 
 ‘CluReAL’ is a port of the Python implementation of the algorithm
-‘CluReAL.v2’, which is designed improve an existing clustering solution
-by splitting multimodal clusters, merging akin clusters, and marking
-tiny or low-density clusters as outliers (noise). Additionally, symbolic
-key ideograms can be created to interpret clusters in high-dimensional
-space. The approach is described in detail in the article by Iglesias et
-al. (2021):  
+‘CluReAL.v2’, which is designed to improve an existing clustering
+solution by splitting multimodal clusters, merging akin clusters, and
+marking tiny or low-density clusters as outliers (noise). Additionally,
+symbolic key ideograms can be created to interpret clusters in
+high-dimensional space. The approach is described in detail in the
+article by Iglesias et al. (2021):  
 <https://doi.org/10.1007/s41060-021-00275-z>.
 
 ## Installation
