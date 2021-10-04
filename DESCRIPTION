@@ -1,0 +1,25 @@
+Package: CluReAL
+Title: Clustering Refinement ALgorithm
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Uli",
+           family = "Niemann",
+           role = c("aut", "cre"),
+           email = "uli.niemann@ovgu.de"
+           )
+Description: 'CluReAL' is a port of the Python implementation of the algorithm 
+    'CluReAL.v2', which is designed improve an existing clustering solution by 
+    splitting multimodal clusters, merging akin clusters, and marking tiny 
+    or low-density clusters as outliers (noise). Additionally, symbolic key 
+    ideograms can be created to interpret clusters in high-dimensional space. 
+    The approach is described in detail in the article by Iglesias et al. (2021)
+    <https://doi.org/10.1007/s41060-021-00275-z>. 
+License: GPL (>= 3)
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Imports: 
+    ClusterR,
+    ggplot2,
+    igraph

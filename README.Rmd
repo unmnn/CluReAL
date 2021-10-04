@@ -1,0 +1,190 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# CluReAL
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+'CluReAL' is a port of the Python implementation of the algorithm 
+'CluReAL.v2', which is designed improve an existing clustering solution by 
+splitting multimodal clusters, merging akin clusters, and marking tiny 
+or low-density clusters as outliers (noise). Additionally, symbolic key 
+ideograms can be created to interpret clusters in high-dimensional space. 
+The approach is described in detail in the article by Iglesias et al. (2021)
+<https://doi.org/10.1007/s41060-021-00275-z>. 
+
+## Installation
+
+<!-- You can install the released version of CluReAL from [CRAN](https://CRAN.R-project.org) with: -->
+
+<!-- ``` r -->
+<!-- install.packages("CluReAL") -->
+<!-- ``` -->
+
+You can install the development version from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("remotes")
+remotes::install_github("unmnn/CluReAL")
+```
+## Example
+
+A typical CluReAL workflow:
+
+1. Create the _cluster context_ by calling `cluster_context(x, y)`, where 
+the matrix `x` represents the dataset with m observations and n dimensions, and
+`y` is the integer vector of length m containing the cluster membership indices
+(-1 represents noise). 
+The output is a list with the following elements: 
+  * `k`: number of clusters (integer)
+  * `centroids`: centroid coordinates (k x n matrix)
+  * `mass`: cluster sizes (integer vector of length k)
+  * `mn_da`: mean Euclidean distances of the cluster members to their centroid 
+  (double vector of length k)
+  * `md_da`: median Euclidean distances of the cluster members to their centroid 
+  (double vector of length k)
+  * `sd_da`: standard deviation of the Euclidean distances of the cluster
+  members to their centroid (double vector of length k)
+  * `de`: Euclidean distance matrix for the centroids (k x k matrix)
+  * `outliers`: number of outliers (integer)
+2. Compute the cluster validity measures by calling `gval(cc)` using the output 
+object from step 1. The output is a list with the following elements:
+  * `g_str`: strict G-index (double)
+  * `g_rex`: relaxed G-index (double) 
+  * `g_min`: min G-index (double)
+  * `oi_st`: cluster-individual strict overlap indices (double vector of length 
+  k)
+  * `oi_rx`: cluster-individual relaxed overlap indices (double vector of length
+  k)
+  * `oi_mn`: cluster-individual min overlap indices (double vector of length k)
+  * `ext_r`: extended cluster radii (double vector of length k) 
+  * `str_r`: strict cluster radii (double vector of length k)
+  * `vol_r`: extended-to-core ratio
+3. Compute the _refinement context_ by calling 
+`refinement_context(x, y, cc, gv)`.
+The output is a list with the following elements:
+  * `mm`: cluster multimodality flag (logical vector of length k)
+  * `k_dens`: cluster-individual relative density (double vector of length k)
+  * `global_c_dens`: global density (double)
+  * `kinship`: cluster kinship matrix (k x k matrix): 0-itself, 
+  1-parent and child, 2-relatives, 3-close friends, 4-acquaintances, 
+  5-unrelated. 
+4. Refine the clustering by calling `refine(x, y, cc, gv, rc)`.
+The output is a list with the following elements:
+  * `y`: vector of the refined cluster membership indices
+  * `cc`: refined cluster context
+
+Load all required packages:
+
+```{r load-dependencies}
+library(CluReAL)
+# install.packages("dplyr")
+# install.packages("tidyr")
+# install.packages("ggplot2")
+# install.packages("palmerpenguins")
+# install.packages("patchwork")
+library(dplyr, warn.conflicts = FALSE)
+library(ggplot2)
+library(patchwork)
+```
+
+We perform kmeans clustering on the Palmer penguins dataset using the variables 
+`flipper_length_mm` and `bill_length_mm`. 
+We [min-max normalize](https://en.wikipedia.org/wiki/Feature_scaling#Rescaling_(min-max_normalization) the variables to unify their range.
+
+```{r prepare}
+peng <- palmerpenguins::penguins %>%
+  tidyr::drop_na() %>%
+  mutate(across(c(flipper_length_mm, bill_length_mm),
+                ~ (.x - min(.x)) / (max(.x) - (min(.x))))) %>%
+  select(flipper = flipper_length_mm, bill = bill_length_mm, species)
+ggplot(peng, aes(x = flipper, y = bill, color = species)) + 
+  geom_point()
+```
+
+Here, we deliberately call kmeans with a cluster count that is too high.
+<!-- + we  -->
+<!-- manually specify two noise points (just for demonstration purposes). -->
+
+```{r kmeans}
+set.seed(1)
+clustering <- kmeans(peng[c("flipper", "bill")], centers = 6)
+
+peng <- peng %>% mutate(cluster = as.factor(clustering$cluster))
+
+p1 <- ggplot(peng, aes(x = flipper, y = bill, color = cluster)) + 
+  geom_point() +
+  labs(title = "Before refining")
+p1
+```
+
+We perform the four steps of CluReAL as described above and compare the 
+clustering solution before and after refining.
+
+```{r clureal, fig.width=9, fig.height=5}
+# Step 1: compute the cluster context
+x <- as.matrix(peng[c("flipper", "bill")])
+y <- clustering$cluster
+cc <- cluster_context(x, y)
+cc
+
+# Step 2: compute the cluster validity indices
+gv <- gval(cc)
+gv
+
+# Step 3: compute the refinement context
+rc <- refinement_context(x, y, cc, gv)
+
+# Step 4: refine the clustering
+rf <- refine(x, y, cc, gv, rc)
+rf
+
+peng <- peng %>% mutate(c_refined = as.factor(rf$y))
+
+p2 <- ggplot(peng, aes(x = flipper, y = bill, color = c_refined)) + 
+  geom_point() +
+  labs(title = "After refining")
+p1 + p2
+```
+
+Draw the clustering solution ideogram before and after refining.
+
+```{r ideogram}
+ideo_before <- draw_symbol(cc, gv, rc)
+
+y_r <- rf$y
+cc_r <- rf$cc
+gv_r <- gval(cc_r)
+rc_r <- refinement_context(x, y_r, cc_r, gv_r)
+ideo_after <- draw_symbol(cc_r, gv_r, rc_r)
+
+ideo_before + ideo_after
+```
+
+Interpretation:
+
+* left: chaotic space, unreliable clusters, `g_str` < 0, `g_rex` < 0
+* right: space with strong global overlap, `g_str` < 0, `g_rex` > 1
+
+<!-- You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this. You could also use GitHub Actions to re-render `README.Rmd` every time you push. An example workflow can be found here: <https://github.com/r-lib/actions/tree/master/examples>. -->
+
+<!-- You can also embed plots, for example: -->
+
+<!-- ```{r pressure, echo = FALSE} -->
+<!-- plot(pressure) -->
+<!-- ``` -->
+
+<!-- In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN. -->
