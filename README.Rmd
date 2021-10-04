@@ -73,6 +73,7 @@ object from step 1. The output is a list with the following elements:
   * `ext_r`: extended cluster radii (double vector of length k) 
   * `str_r`: strict cluster radii (double vector of length k)
   * `vol_r`: extended-to-core ratio
+
 3. Compute the _refinement context_ by calling 
 `refinement_context(x, y, cc, gv)`.
 The output is a list with the following elements:
@@ -82,6 +83,7 @@ The output is a list with the following elements:
   * `kinship`: cluster kinship matrix (k x k matrix): 0-itself, 
   1-parent and child, 2-relatives, 3-close friends, 4-acquaintances, 
   5-unrelated. 
+
 4. Refine the clustering by calling `refine(x, y, cc, gv, rc)`.
 The output is a list with the following elements:
   * `y`: vector of the refined cluster membership indices
@@ -103,7 +105,7 @@ library(patchwork)
 
 We perform kmeans clustering on the Palmer penguins dataset using the variables 
 `flipper_length_mm` and `bill_length_mm`. 
-We [min-max normalize](https://en.wikipedia.org/wiki/Feature_scaling#Rescaling_(min-max_normalization) the variables to unify their range.
+We [min-max normalize](https://en.wikipedia.org/wiki/Feature_scaling#Rescaling_(min-max_normalization)) the variables to unify their range.
 
 ```{r prepare}
 peng <- palmerpenguins::penguins %>%
@@ -162,7 +164,7 @@ p1 + p2
 
 Draw the clustering solution ideogram before and after refining.
 
-```{r ideogram}
+```{r ideogram, fig.dim=c(6,2)}
 ideo_before <- draw_symbol(cc, gv, rc)
 
 y_r <- rf$y

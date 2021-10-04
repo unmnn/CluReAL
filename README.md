@@ -107,8 +107,8 @@ library(patchwork)
 ```
 
 We perform kmeans clustering on the Palmer penguins dataset using the
-variables `flipper_length_mm` and `bill_length_mm`. We \[min-max
-normalize\](<https://en.wikipedia.org/wiki/Feature_scaling#Rescaling_(min-max_normalization)>
+variables `flipper_length_mm` and `bill_length_mm`. We [min-max
+normalize](https://en.wikipedia.org/wiki/Feature_scaling#Rescaling_(min-max_normalization))
 the variables to unify their range.
 
 ``` r
@@ -124,6 +124,8 @@ ggplot(peng, aes(x = flipper, y = bill, color = species)) +
 <img src="man/figures/README-prepare-1.png" width="100%" />
 
 Here, we deliberately call kmeans with a cluster count that is too high.
+<!-- + we  -->
+<!-- manually specify two noise points (just for demonstration purposes). -->
 
 ``` r
 set.seed(1)
