@@ -23,7 +23,7 @@ knitr::opts_chunk$set(
 splitting multimodal clusters, merging akin clusters, and marking tiny 
 or low-density clusters as outliers (noise). Additionally, symbolic key 
 ideograms can be created to interpret clusters in high-dimensional space. 
-The approach is described in detail in the article by Iglesias et al. (2021)
+The approach is described in detail in the article by Iglesias et al. (2021):  
 <https://doi.org/10.1007/s41060-021-00275-z>. 
 
 ## Installation
@@ -49,45 +49,46 @@ the matrix `x` represents the dataset with m observations and n dimensions, and
 `y` is the integer vector of length m containing the cluster membership indices
 (-1 represents noise). 
 The output is a list with the following elements: 
-  * `k`: number of clusters (integer)
-  * `centroids`: centroid coordinates (k x n matrix)
-  * `mass`: cluster sizes (integer vector of length k)
-  * `mn_da`: mean Euclidean distances of the cluster members to their centroid 
+    * `k`: number of clusters (integer)
+    * `centroids`: centroid coordinates (k x n matrix)
+    * `mass`: cluster sizes (integer vector of length k)
+    * `mn_da`: mean Euclidean distances of the cluster members to their centroid 
   (double vector of length k)
-  * `md_da`: median Euclidean distances of the cluster members to their centroid 
+    * `md_da`: median Euclidean distances of the cluster members to their centroid 
   (double vector of length k)
-  * `sd_da`: standard deviation of the Euclidean distances of the cluster
+    * `sd_da`: standard deviation of the Euclidean distances of the cluster
   members to their centroid (double vector of length k)
-  * `de`: Euclidean distance matrix for the centroids (k x k matrix)
-  * `outliers`: number of outliers (integer)
+    * `de`: Euclidean distance matrix for the centroids (k x k matrix)
+    * `outliers`: number of outliers (integer)
+  
 2. Compute the cluster validity measures by calling `gval(cc)` using the output 
 object from step 1. The output is a list with the following elements:
-  * `g_str`: strict G-index (double)
-  * `g_rex`: relaxed G-index (double) 
-  * `g_min`: min G-index (double)
-  * `oi_st`: cluster-individual strict overlap indices (double vector of length 
-  k)
-  * `oi_rx`: cluster-individual relaxed overlap indices (double vector of length
-  k)
-  * `oi_mn`: cluster-individual min overlap indices (double vector of length k)
-  * `ext_r`: extended cluster radii (double vector of length k) 
-  * `str_r`: strict cluster radii (double vector of length k)
-  * `vol_r`: extended-to-core ratio
+    * `g_str`: strict G-index (double)
+    * `g_rex`: relaxed G-index (double) 
+    * `g_min`: min G-index (double)
+    * `oi_st`: cluster-individual strict overlap indices 
+  (double vector of length k)
+    * `oi_rx`: cluster-individual relaxed overlap indices 
+  (double vector of length k)
+    * `oi_mn`: cluster-individual min overlap indices (double vector of length k)
+    * `ext_r`: extended cluster radii (double vector of length k) 
+    * `str_r`: strict cluster radii (double vector of length k)
+    * `vol_r`: extended-to-core ratio
 
 3. Compute the _refinement context_ by calling 
 `refinement_context(x, y, cc, gv)`.
 The output is a list with the following elements:
-  * `mm`: cluster multimodality flag (logical vector of length k)
-  * `k_dens`: cluster-individual relative density (double vector of length k)
-  * `global_c_dens`: global density (double)
-  * `kinship`: cluster kinship matrix (k x k matrix): 0-itself, 
+    * `mm`: cluster multimodality flag (logical vector of length k)
+    * `k_dens`: cluster-individual relative density (double vector of length k)
+    * `global_c_dens`: global density (double)
+    * `kinship`: cluster kinship matrix (k x k matrix): 0-itself, 
   1-parent and child, 2-relatives, 3-close friends, 4-acquaintances, 
   5-unrelated. 
 
 4. Refine the clustering by calling `refine(x, y, cc, gv, rc)`.
 The output is a list with the following elements:
-  * `y`: vector of the refined cluster membership indices
-  * `cc`: refined cluster context
+    * `y`: vector of the refined cluster membership indices
+    * `cc`: refined cluster context
 
 Load all required packages:
 
